@@ -2,6 +2,7 @@
 pragma solidity >=0.6.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {ISuperfluid} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol"; //"@superfluid-finance/ethereum-monorepo/packages/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 
@@ -58,11 +59,18 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
     uint256 public numberOfProposals;
 
     struct Proposal {
+        /// The account receiving the money if the proposal is successful
         address recipient;
+        /// A description of the proposal.
         string description;
-        uint256 value;
+        /// The percentage of money to send to the recipient if the proposal is successful.
+        /// Must be a value between 1 and 100.
+        uint256 percentageValue;
+        /// A flag indicating whether the proposal has been executed.
         bool completed;
+        /// The number of YAY votes for this proposal.
         uint256 yayVotes;
+        /// Mapping to check whether an account has voted on this proposal.
         mapping(address => bool) voters;
     }
 
@@ -80,7 +88,7 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
     event CreateProposalEvent(
         string _description,
         address indexed _recipient,
-        uint256 _value
+        uint256 _percentageValue
     );
     /// Fired when our contract sends money to a recipient
     event FundingEvent(address indexed _recipient, uint256 _value);
@@ -121,17 +129,17 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
     function createProposal(
         string memory _description,
         address _recipient,
-        uint256 _value
+        uint256 _percentageValue
     ) public onlyNFTHolders {
         Proposal storage newRequest = proposals[numberOfProposals];
         numberOfProposals++;
 
         newRequest.description = _description;
         newRequest.recipient = _recipient;
-        newRequest.value = _value;
+        newRequest.percentageValue = _percentageValue;
         newRequest.completed = false;
 
-        emit CreateProposalEvent(_description, _recipient, _value);
+        emit CreateProposalEvent(_description, _recipient, _percentageValue);
     }
 
     function voteForProposal(uint256 _proposal) public onlyNFTHolders {
@@ -148,9 +156,14 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
             "Only proposals with more than 50% YAY votes can be executed!"
         );
         proposal.completed = true;
-        // TODO: send tokens via superfluid
 
-        emit FundingEvent(proposal.recipient, proposal.value);
+        uint256 totalBalance = _token.balanceOf(address(this));
+        uint256 value = totalBalance * proposal.percentageValue / 100;
+        _token.downgrade(value);
+        IERC20 underlyingToken = IERC20(_token.getUnderlyingToken());
+        underlyingToken.transfer(proposal.recipient, value);
+
+        emit FundingEvent(proposal.recipient, value);
     }
 
     // Super fluid functions
