@@ -88,10 +88,15 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
     event CreateProposalEvent(
         string _description,
         address indexed _recipient,
-        uint256 _percentageValue
+        uint256 _percentageValue,
+        uint256 proposalId
     );
     /// Fired when our contract sends money to a recipient
-    event FundingEvent(address indexed _recipient, uint256 _value);
+    event FundingEvent(
+        address indexed _recipient,
+        uint256 _value,
+        uint256 proposalId
+    );
 
     function _mintContributorToken(
         address _addressContributor
@@ -115,6 +120,7 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
         address _recipient,
         uint256 _percentageValue
     ) public onlyNFTHolders {
+        // TODO check percentage value is between 1 and 100!
         Proposal storage newRequest = proposals[numberOfProposals];
         numberOfProposals++;
 
@@ -123,7 +129,7 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
         newRequest.percentageValue = _percentageValue;
         newRequest.completed = false;
 
-        emit CreateProposalEvent(_description, _recipient, _percentageValue);
+        emit CreateProposalEvent(_description, _recipient, _percentageValue, numberOfProposals - 1);
     }
 
     function voteForProposal(uint256 _proposal) public onlyNFTHolders {
@@ -149,7 +155,7 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
         IERC20 underlyingToken = IERC20(_token.getUnderlyingToken());
         underlyingToken.transfer(proposal.recipient, value);
 
-        emit FundingEvent(proposal.recipient, value);
+        emit FundingEvent(proposal.recipient, value, _proposal);
     }
 
     // Super fluid functions
