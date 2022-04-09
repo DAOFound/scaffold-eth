@@ -1,4 +1,5 @@
 import Address from "./Address";
+import { ProposalExecuteButton } from "./ProposalExecuteButton";
 import { ProposalVoteButton } from "./ProposalVoteButton";
 
 export function ProposalDetails({ proposal, mainnetProvider, writeContracts, tx }) {
@@ -13,7 +14,8 @@ export function ProposalDetails({ proposal, mainnetProvider, writeContracts, tx 
   } else {
     completedContent = (
       <>
-        <ProposalVoteButton proposal={proposal} writeContracts={writeContracts} tx={tx} />
+        <ProposalVoteButton proposal={proposal} writeContracts={writeContracts} tx={tx} /><br />
+        <ProposalExecuteButton proposal={proposal} writeContracts={writeContracts} tx={tx} />
       </>
     );
   }
