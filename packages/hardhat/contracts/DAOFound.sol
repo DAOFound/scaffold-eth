@@ -1,7 +1,8 @@
-//SPDX-License-Identifier: GPL 3.0
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.6.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {ISuperfluid} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol"; //"@superfluid-finance/ethereum-monorepo/packages/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 
@@ -58,11 +59,18 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
     uint256 public numberOfProposals;
 
     struct Proposal {
+        /// The account receiving the money if the proposal is successful
         address recipient;
+        /// A description of the proposal.
         string description;
-        uint256 value;
+        /// The percentage of money to send to the recipient if the proposal is successful.
+        /// Must be a value between 1 and 100.
+        uint256 percentageValue;
+        /// A flag indicating whether the proposal has been executed.
         bool completed;
+        /// The number of YAY votes for this proposal.
         uint256 yayVotes;
+        /// Mapping to check whether an account has voted on this proposal.
         mapping(address => bool) voters;
     }
 
@@ -80,34 +88,23 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
     event CreateProposalEvent(
         string _description,
         address indexed _recipient,
-        uint256 _value
+        uint256 _percentageValue,
+        uint256 proposalId
     );
     /// Fired when our contract sends money to a recipient
-    event FundingEvent(address indexed _recipient, uint256 _value);
+    event FundingEvent(
+        address indexed _recipient,
+        uint256 _value,
+        uint256 proposalId
+    );
 
     function _mintContributorToken(
-        address _addressContributor,
-        bytes calldata _ctx
-    ) public returns (bytes memory newCtx) {
-        /// This should be private for Production!
-
-        //maybe change this for IF, don't revert and only mint nft if user has 0
-        // So user can add a new flow
-
-        // if (balanceOf(_addressContributor) == 0) {
-        //     _safeMint(_addressContributor, numberOfContributors);
-        //     numberOfContributors++;
-        // }
-        require(
-            balanceOf(_addressContributor) == 0,
-            "You already have a Contributor NFT!"
-        );
+        address _addressContributor
+    ) private {
         _safeMint(_addressContributor, numberOfContributors);
         numberOfContributors++;
 
-        emit ContributeEvent(msg.sender);
-
-        return _ctx;
+        emit ContributeEvent(_addressContributor);
     }
 
     function _transfer(
@@ -121,21 +118,23 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
     function createProposal(
         string memory _description,
         address _recipient,
-        uint256 _value
+        uint256 _percentageValue
     ) public onlyNFTHolders {
+        // TODO check percentage value is between 1 and 100!
         Proposal storage newRequest = proposals[numberOfProposals];
         numberOfProposals++;
 
         newRequest.description = _description;
         newRequest.recipient = _recipient;
-        newRequest.value = _value;
+        newRequest.percentageValue = _percentageValue;
         newRequest.completed = false;
 
-        emit CreateProposalEvent(_description, _recipient, _value);
+        emit CreateProposalEvent(_description, _recipient, _percentageValue, numberOfProposals - 1);
     }
 
     function voteForProposal(uint256 _proposal) public onlyNFTHolders {
         Proposal storage proposal = proposals[_proposal];
+        require(proposal.completed == false, "You cannot vote for completed proposals!");
         require(proposal.voters[msg.sender] == false, "You have already voted");
         proposal.voters[msg.sender] = true;
         proposal.yayVotes += 1;
@@ -143,14 +142,20 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
 
     function executeProposal(uint256 _proposal) public {
         Proposal storage proposal = proposals[_proposal];
+        require(proposal.completed == false, "Cannot execute a proposal several times!");
         require(
             proposal.yayVotes * 2 > totalSupply(),
             "Only proposals with more than 50% YAY votes can be executed!"
         );
         proposal.completed = true;
-        // TODO: send tokens via superfluid
 
-        emit FundingEvent(proposal.recipient, proposal.value);
+        uint256 totalBalance = _token.balanceOf(address(this));
+        uint256 value = totalBalance * proposal.percentageValue / 100;
+        _token.downgrade(value);
+        IERC20 underlyingToken = IERC20(_token.getUnderlyingToken());
+        underlyingToken.transfer(proposal.recipient, value);
+
+        emit FundingEvent(proposal.recipient, value, _proposal);
     }
 
     // Super fluid functions
@@ -158,22 +163,28 @@ contract DAOFound is ERC721Enumerable, SuperAppBase {
     //This function gets called whenever a new IN flow is made TO this contract
     function afterAgreementCreated(
         ISuperToken _superToken,
-        address _agreementClass,
+        address, // _agreementClass,
         bytes32, // _agreementId,
-        bytes calldata, /*_agreementData*/
+        bytes calldata _agreementData,
         bytes calldata, // _cbdata,
         bytes calldata _ctx
     ) external override onlyHost returns (bytes memory newCtx) {
         // decode Contex - this will return the entire Context struct
-        ISuperfluid.Context memory decompiledContext = _host.decodeCtx(_ctx);
+        // ISuperfluid.Context memory decompiledContext = _host.decodeCtx(_ctx);
 
-        address decodedUserData = abi.decode(
-            decompiledContext.userData,
-            (address)
-        );
+        // address decodedUserData = abi.decode(
+        //     decompiledContext.userData,
+        //     (address)
+        // );
 
-        // Gets minted
-        return _mintContributorToken(decodedUserData, _ctx);
+        (address sender, address receiver) = abi.decode(_agreementData, (address, address));
+
+        // Mint contributor NFT only for new contributors
+        if (balanceOf(sender) == 0) {
+            _mintContributorToken(sender);
+        }
+
+        return _ctx;
     }
 
     modifier onlyHost() {
