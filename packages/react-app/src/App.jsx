@@ -290,7 +290,7 @@ function App(props) {
             */}
 
           <Contract
-            name="SuperFluidTests"
+            name="DAOFound"
             price={price}
             signer={userSigner}
             provider={localProvider}
@@ -414,6 +414,7 @@ function App(props) {
           </Col>
         </Row>
       </div>
+
     </div>
   );
 }
