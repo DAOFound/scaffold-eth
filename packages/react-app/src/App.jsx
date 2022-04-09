@@ -315,7 +315,17 @@ function App(props) {
 
         </Route>
         <Route path="/exampleUI">
-          <ExampleUI />
+          <ExampleUI
+            address={address}
+            mainnetProvider={mainnetProvider}
+            localProvider={localProvider}
+            yourLocalBalance={yourLocalBalance}
+            price={price}
+            tx={tx}
+            writeContracts={writeContracts}
+            readContracts={readContracts}
+            blockExplorer={blockExplorer}
+          />
 
         </Route>
         <Route path="/mainnetdai">

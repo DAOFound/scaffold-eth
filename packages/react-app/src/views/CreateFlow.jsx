@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Framework } from "@superfluid-finance/sdk-core";
-import {
-    Button,
-    Form,
-    FormGroup,
-    FormControl,
-    Spinner,
-    Card
-} from "react-bootstrap";
+
 // import "./createFlow.css";
 import { ethers } from "ethers";
 
 import { defaultAbiCoder } from "ethers/lib/utils";
+
+import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switch } from "antd";
+
 
 // let account;
 
@@ -22,6 +18,37 @@ const url = 'https://api.covalenthq.com/v1/42/events/address/0x44e38a093481268bf
 
 
 //where the Superfluid logic takes place
+
+
+async function getFlow(currentAccount) {
+
+    console.log("test");
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+    const signer = provider.getSigner();
+    const chainId = await window.ethereum.request({ method: "eth_chainId" });
+    const sf = await Framework.create({
+        chainId: Number(chainId),
+        provider: provider
+    });
+
+    const DAIx = "0xe3cb950cb164a31c66e32c320a800d477019dcff";
+
+    const receiver = '0xA09d842a60418E2E33e15c5F52ede962D96c1Eb1';
+
+    const response = await sf.cfaV1.getFlow({
+        superToken: DAIx,
+        sender: currentAccount,
+        receiver: receiver,
+        providerOrSigner: signer
+    })
+
+    console.log(response.flowRate);
+
+}
+
+
 async function createNewFlow(recipient, flowRate, currentAccount) {
 
 
@@ -75,6 +102,55 @@ async function createNewFlow(recipient, flowRate, currentAccount) {
         );
         console.error(error);
     }
+}
+
+
+async function deleteFlow(currentAccount) {
+
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+    const signer = provider.getSigner();
+
+    const chainId = await window.ethereum.request({ method: "eth_chainId" });
+    const sf = await Framework.create({
+        chainId: Number(chainId),
+        provider: provider
+    });
+
+    const DAIx = "0xe3cb950cb164a31c66e32c320a800d477019dcff";
+
+    const recipient = "0xED0262718A77e09C3C8F48696791747E878a5551"; //DAOFound address
+
+
+    try {
+
+        console.log("account", currentAccount);
+
+        const userData = defaultAbiCoder.encode(["address"], [currentAccount]);
+        const deleteFlowOperation = sf.cfaV1.deleteFlow({
+            sender: currentAccount,
+            receiver: recipient,
+            superToken: DAIx
+            // userData?: string
+        });
+        console.log("Deleting your stream...");
+
+        await deleteFlowOperation.exec(signer);
+
+        console.log(
+            `Congrats - you've just deleted your money stream!
+       Network: Kovan
+       Super Token: DAIx
+       Sender: 0xDCB45e4f6762C3D7C61a00e96Fb94ADb7Cf27721
+       Receiver: ${recipient}
+    `
+        );
+    } catch (error) {
+        console.error(error);
+    }
+
+
 }
 
 async function getEventsCovalent() {
@@ -214,7 +290,7 @@ function CreateFlow() {
     function CreateButton({ isLoading, children, ...props }) {
         return (
             <Button variant="success" className="button" {...props}>
-                {isButtonLoading ? <Spinner animation="border" /> : children}
+                {isButtonLoading ? <Spin animation="border" /> : children}
             </Button>
         );
     }
@@ -239,54 +315,35 @@ function CreateFlow() {
                     </button>
 
                 </>
-            ) : (
-                <Card className="connectedWallet">
-                    {`${currentAccount.substring(0, 4)}...${currentAccount.substring(
-                        38
-                    )}`}
-                </Card>
+            ) : <></>}
+            <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
+                <Input placeholder="Recipient"
+                    onChange={handleRecipientChange}
 
-            )}
-            <Form>
-                <FormGroup className="mb-3">
-                    <FormControl
-                        name="recipient"
-                        value={recipient}
-                        onChange={handleRecipientChange}
-                        placeholder="Enter recipient address"
-                    ></FormControl>
-                </FormGroup>
-                <FormGroup className="mb-3">
-                    <FormControl
-                        name="flowRate"
-                        value={flowRate}
-                        onChange={handleFlowRateChange}
-                        placeholder="Enter a flowRate in wei/second"
-                    ></FormControl>
-                </FormGroup>
-                <CreateButton
-                    onClick={() => {
-                        setIsButtonLoading(true);
+                />
+                <Input placeholder="Flow rate"
+                    onChange={handleFlowRateChange}
+                />
+                <Button
+                    style={{ marginTop: 8 }}
+                    onClick={async () => {
+                        /* look how you call setPurpose on your contract: */
+                        /* notice how you pass a call back for tx updates too */
                         createNewFlow(recipient, flowRate, currentAccount);
-                        setTimeout(() => {
-                            setIsButtonLoading(false);
-                        }, 1000);
                     }}
                 >
-                    Click to Create Yofur Stream
-                </CreateButton>
-
-            </Form>
-
-            <button onClick={getEventsCovalent}>
-                GET EVENTS
-            </button>
-
+                    Create stream!
+                </Button>
+            </div>
+            <Button onClick={async () => {
+                /* look how you call setPurpose on your contract: */
+                /* notice how you pass a call back for tx updates too */
+                getFlow(currentAccount);
+            }}>
+                GET FLOW
+            </Button>
             <div className="description">
-                <p>
-                    Go to the CreateFlow.js component and look at the <b>createFlow() </b>
-                    function to see under the hood
-                </p>
+
                 <div className="calculation">
                     <p>Your flow will be equal to:</p>
                     <p>
