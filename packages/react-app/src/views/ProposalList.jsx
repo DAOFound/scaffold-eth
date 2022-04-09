@@ -8,11 +8,11 @@ function ProposalList({ chainId, mainnetProvider, writeContracts, tx }) {
   useEffect(() => {
     if (!chainId) return;
     async function getData() {
-      var proposalData = await getProposalDataFromCovalent(chainId);
+      var proposalData = await getProposalDataFromCovalent(chainId, writeContracts.DAOFound.address);
       setProposals(proposalData);
     }
     getData();
-  }, [chainId]);
+  }, [chainId, writeContracts.DAOFound]);
 
   return (
     <>

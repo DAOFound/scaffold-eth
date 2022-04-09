@@ -20,6 +20,13 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
         "0x745861AeD1EEe363b4AaA5F1994Be40b1e05Ff90",
       ];
       break;
+    case "80001":
+      // mumbai
+      args = [
+        "0xEB796bdb90fFA0f28255275e16936D25d3418603",
+        "0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f",
+      ];
+      break;
     default:
       // eslint-disable-next-line no-throw-literal
       throw `Unsupported network: ${chainId}`;
