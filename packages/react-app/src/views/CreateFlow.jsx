@@ -15,8 +15,17 @@ import { defaultAbiCoder } from "ethers/lib/utils";
 
 // let account;
 
+
+
+
+const url = 'https://api.covalenthq.com/v1/42/events/address/0x44e38a093481268bfF47cc4f795e6fC0C41cf38c/?starting-block=30920009&ending-block=latest&key=ckey_9ab7b2cd25f24aea8f55108f4b8'
+
+
 //where the Superfluid logic takes place
 async function createNewFlow(recipient, flowRate, currentAccount) {
+
+
+
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
     const signer = provider.getSigner();
@@ -28,7 +37,6 @@ async function createNewFlow(recipient, flowRate, currentAccount) {
     });
 
     const DAIx = "0xe3cb950cb164a31c66e32c320a800d477019dcff";
-
 
 
 
@@ -69,12 +77,71 @@ async function createNewFlow(recipient, flowRate, currentAccount) {
     }
 }
 
+async function getEventsCovalent() {
+
+    console.log("test")
+    console.log("test");
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+
+        let proposalList = [];
+        let fundingList = [];
+        for (var entry of data.data.items) {
+            switch (entry.raw_log_topics[0]) {
+
+                case '0x344e2edbd54b7e137047f4e5af7fae74a07ad72083d9641d9cd5244653bded6b':
+                    const proposalEvent = defaultAbiCoder.decode(["string", "uint256", "uint256"], entry.raw_log_data);
+
+                    const proposal = {
+                        proposalAddress: defaultAbiCoder.decode(["address"], entry.raw_log_topics[1]),
+                        proposalDescription: proposalEvent[0],
+                        proposalPercentage: parseInt(proposalEvent[1]._hex, 16),
+                        proposalId: parseInt(proposalEvent[2]._hex, 16)
+                    };
+
+                    proposalList.push(proposal);
+                    break;
+                case '0xa7cbaaf15738ea1bcbdddfb06d8da60b51bd361982de413abad956b5df0b02b9':
+                    const fundingEvent = defaultAbiCoder.decode(["uint256", "uint256"], entry.raw_log_data);
+
+                    const funding = {
+                        fundingAddress: defaultAbiCoder.decode(["address"], entry.raw_log_topics[1]),
+                        fundingValue: parseInt(fundingEvent[0]._hex, 16),
+                        fundingProposalId: parseInt(fundingEvent[1]._hex, 16)
+
+                    }
+                    fundingList.push(funding);
+                    break;
+
+            }
+
+        }
+
+        console.log(proposalList, fundingList);
+    }
+
+    catch (error) {
+        console.error(error);
+    }
+
+}
+
 function CreateFlow() {
     const [recipient, setRecipient] = useState("");
     const [isButtonLoading, setIsButtonLoading] = useState(false);
     const [flowRate, setFlowRate] = useState("");
     const [flowRateDisplay, setFlowRateDisplay] = useState("");
     const [currentAccount, setCurrentAccount] = useState("");
+
+
+
+
+
+    useEffect(() => {
+        getEventsCovalent();
+    }, []);
 
     const connectWallet = async () => {
         try {
@@ -166,15 +233,19 @@ function CreateFlow() {
         <div>
             <h2>Create a Flow</h2>
             {currentAccount === "" ? (
-                <button id="connectWallet" className="button" onClick={connectWallet}>
-                    Connect Wallet
-                </button>
+                <>
+                    <button id="connectWallet" className="button" onClick={connectWallet}>
+                        Connect Wallet
+                    </button>
+
+                </>
             ) : (
                 <Card className="connectedWallet">
                     {`${currentAccount.substring(0, 4)}...${currentAccount.substring(
                         38
                     )}`}
                 </Card>
+
             )}
             <Form>
                 <FormGroup className="mb-3">
@@ -202,9 +273,14 @@ function CreateFlow() {
                         }, 1000);
                     }}
                 >
-                    Click to Create Your Stream
+                    Click to Create Yofur Stream
                 </CreateButton>
+
             </Form>
+
+            <button onClick={getEventsCovalent}>
+                GET EVENTS
+            </button>
 
             <div className="description">
                 <p>

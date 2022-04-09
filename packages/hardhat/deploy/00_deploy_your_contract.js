@@ -17,7 +17,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   const { deployer } = await getNamedAccounts();
   const chainId = await getChainId();
 
-  await deploy("SuperFluidTests", {
+  await deploy("DAOFound", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
     args: ["0xF0d7d1D47109bA426B9D8A3Cde1941327af1eea3", "0xe3cb950cb164a31c66e32c320a800d477019dcff"],// kovan host

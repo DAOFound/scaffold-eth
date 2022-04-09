@@ -269,6 +269,9 @@ function App(props) {
         <Menu.Item key="/createFlow">
           <Link to="/createFlow">Create Flow</Link>
         </Menu.Item>
+        <Menu.Item key="/exampleUI">
+          <Link to="/exampleUI">CREATEPROPOSALVOTE</Link>
+        </Menu.Item>
         <Menu.Item key="/mainnetdai">
           <Link to="/mainnetdai">Mainnet DAI</Link>
         </Menu.Item>
@@ -309,6 +312,10 @@ function App(props) {
         </Route>
         <Route path="/createFlow">
           <CreateFlow />
+
+        </Route>
+        <Route path="/exampleUI">
+          <ExampleUI />
 
         </Route>
         <Route path="/mainnetdai">
