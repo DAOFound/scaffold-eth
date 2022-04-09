@@ -2,16 +2,17 @@ import { useEffect, useState } from "react";
 import { ProposalDetails } from "../components/ProposalDetails";
 import { getProposalDataFromCovalent } from "../helpers/covalent";
 
-function ProposalList() {
+function ProposalList({ chainId }) {
   const [proposals, setProposals] = useState([]);
 
   useEffect(() => {
+    if (!chainId) return;
     async function getData() {
-      var proposalData = await getProposalDataFromCovalent();
+      var proposalData = await getProposalDataFromCovalent(chainId);
       setProposals(proposalData);
     }
     getData();
-  }, []);
+  }, [chainId]);
 
   return (
     <>

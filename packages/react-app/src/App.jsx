@@ -289,7 +289,7 @@ function App(props) {
           <Home yourLocalBalance={yourLocalBalance} readContracts={readContracts} />
         </Route>
         <Route exact path="/listProposals">
-          <ProposalList />
+          <ProposalList chainId={selectedChainId} />
         </Route>
         <Route exact path="/debug">
           {/*
