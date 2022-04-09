@@ -9,6 +9,10 @@ export const BLOCKNATIVE_DAPPID = "0b58206a-f3c0-4701-a62f-73c7243e8c77";
 
 export const ALCHEMY_KEY = "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF";
 
+export const COVALENT_API_KEY = "ckey_9ab7b2cd25f24aea8f55108f4b8";
+
+export const DAOFOUND_CONTRACT_ADDRESS = "0x44e38a093481268bfF47cc4f795e6fC0C41cf38c";
+
 export const NETWORKS = {
   localhost: {
     name: "localhost",
