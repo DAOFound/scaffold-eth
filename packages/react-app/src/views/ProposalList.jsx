@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ProposalDetails } from "../components/ProposalDetails";
 import { getProposalDataFromCovalent } from "../helpers/covalent";
 
-function ProposalList({ chainId }) {
+function ProposalList({ chainId, mainnetProvider, writeContracts, tx }) {
   const [proposals, setProposals] = useState([]);
 
   useEffect(() => {
@@ -17,7 +17,13 @@ function ProposalList({ chainId }) {
   return (
     <>
       {Object.values(proposals).map(proposal => (
-        <ProposalDetails proposal={proposal} key={proposal.proposalId} />
+        <ProposalDetails
+          proposal={proposal}
+          key={proposal.proposalId}
+          mainnetProvider={mainnetProvider}
+          writeContracts={writeContracts}
+          tx={tx}
+        />
       ))}
     </>
   );
