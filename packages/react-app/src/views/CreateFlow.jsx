@@ -11,10 +11,12 @@ import {
 // import "./createFlow.css";
 import { ethers } from "ethers";
 
+import { defaultAbiCoder } from "ethers/lib/utils";
+
 // let account;
 
 //where the Superfluid logic takes place
-async function createNewFlow(recipient, flowRate) {
+async function createNewFlow(recipient, flowRate, currentAccount) {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
     const signer = provider.getSigner();
@@ -27,15 +29,24 @@ async function createNewFlow(recipient, flowRate) {
 
     const DAIx = "0xe3cb950cb164a31c66e32c320a800d477019dcff";
 
+
+
+
     try {
+
+        console.log("account", currentAccount);
+
+        const userData = defaultAbiCoder.encode(["address"], [currentAccount]);
         const createFlowOperation = sf.cfaV1.createFlow({
             receiver: recipient,
             flowRate: flowRate,
-            superToken: DAIx
-            // userData?: string
+            superToken: DAIx,
+            userData: userData// here we will send the address that sends the money
         });
 
         console.log("Creating your stream...");
+
+
 
         const result = await createFlowOperation.exec(signer);
         console.log(result);
@@ -185,7 +196,7 @@ function CreateFlow() {
                 <CreateButton
                     onClick={() => {
                         setIsButtonLoading(true);
-                        createNewFlow(recipient, flowRate);
+                        createNewFlow(recipient, flowRate, currentAccount);
                         setTimeout(() => {
                             setIsButtonLoading(false);
                         }, 1000);
