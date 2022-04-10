@@ -870,7 +870,7 @@
       "chainId": "42",
       "contracts": {
         "DAOFound": {
-          "address": "0xf0B4c8e8d7Ec7D8e252920D8d121eEcBF18038f1",
+          "address": "0xF0cEEaE86d79A8431225B567c2E76EbDE576779c",
           "abi": [
             {
               "inputs": [
