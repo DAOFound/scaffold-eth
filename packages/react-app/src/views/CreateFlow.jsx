@@ -4,9 +4,9 @@ import { ethers } from "ethers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switch } from "antd";
 import { ConsoleSqlOutlined } from "@ant-design/icons";
-import { usePoller } from "eth-hooks";
+import { usePoller, useOnBlock } from "eth-hooks";
 
-function CreateFlow({ readContracts, userProviderAndSigner, selectedChainId, address }) {
+function CreateFlow({ readContracts, userProviderAndSigner, selectedChainId, address, writeContracts }) {
     const [recipient, setRecipient] = useState("");
     const [isButtonLoading, setIsButtonLoading] = useState(false);
     const [flowRate, setFlowRate] = useState("");
@@ -22,7 +22,7 @@ function CreateFlow({ readContracts, userProviderAndSigner, selectedChainId, add
 
         getData();
 
-    });
+    }, [writeContracts.DAOFound]);
 
     function getDAITokenContract(chainId) {
         switch (chainId) {
