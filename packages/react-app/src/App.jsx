@@ -322,8 +322,7 @@ function App(props) {
           />
         </Route>
         <Route path="/createFlow">
-          <CreateFlow />
-
+          <CreateFlow writeContracts={writeContracts} readContracts={readContracts} />
         </Route>
         <Route path="/exampleUI">
           <ExampleUI

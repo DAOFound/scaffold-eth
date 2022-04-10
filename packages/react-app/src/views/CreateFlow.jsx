@@ -1,223 +1,128 @@
 import React, { useState, useEffect } from "react";
 import { Framework } from "@superfluid-finance/sdk-core";
-
-// import "./createFlow.css";
 import { ethers } from "ethers";
-
 import { defaultAbiCoder } from "ethers/lib/utils";
-
 import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switch } from "antd";
+import { ConsoleSqlOutlined } from "@ant-design/icons";
 
-
-// let account;
-
-
-
-
-const url = 'https://api.covalenthq.com/v1/42/events/address/0x44e38a093481268bfF47cc4f795e6fC0C41cf38c/?starting-block=30920009&ending-block=latest&key=ckey_9ab7b2cd25f24aea8f55108f4b8'
-
-
-//where the Superfluid logic takes place
-
-
-async function getFlow(currentAccount) {
-
-    console.log("test");
-
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-    const signer = provider.getSigner();
-    const chainId = await window.ethereum.request({ method: "eth_chainId" });
-    const sf = await Framework.create({
-        chainId: Number(chainId),
-        provider: provider
-    });
-
-    const DAIx = "0xe3cb950cb164a31c66e32c320a800d477019dcff";
-
-    const receiver = '0xA09d842a60418E2E33e15c5F52ede962D96c1Eb1';
-
-    const response = await sf.cfaV1.getFlow({
-        superToken: DAIx,
-        sender: currentAccount,
-        receiver: receiver,
-        providerOrSigner: signer
-    })
-
-    console.log(response.flowRate);
-
-}
-
-
-async function createNewFlow(recipient, flowRate, currentAccount) {
-
-
-
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-    const signer = provider.getSigner();
-
-    const chainId = await window.ethereum.request({ method: "eth_chainId" });
-    const sf = await Framework.create({
-        chainId: Number(chainId),
-        provider: provider
-    });
-
-    const DAIx = "0xe3cb950cb164a31c66e32c320a800d477019dcff";
-
-
-
-    try {
-
-        console.log("account", currentAccount);
-
-        const userData = defaultAbiCoder.encode(["address"], [currentAccount]);
-        const createFlowOperation = sf.cfaV1.createFlow({
-            receiver: recipient,
-            flowRate: flowRate,
-            superToken: DAIx,
-            userData: userData// here we will send the address that sends the money
-        });
-
-        console.log("Creating your stream...");
-
-
-
-        const result = await createFlowOperation.exec(signer);
-        console.log(result);
-
-        console.log(
-            `Congrats - you've just created a money stream!
-    View Your Stream At: https://app.superfluid.finance/dashboard/${recipient}
-    Network: Kovan
-    Super Token: DAIx
-    Sender: 0xDCB45e4f6762C3D7C61a00e96Fb94ADb7Cf27721
-    Receiver: ${recipient},
-    FlowRate: ${flowRate}
-    `
-        );
-    } catch (error) {
-        console.log(
-            "Hmmm, your transaction threw an error. Make sure that this stream does not already exist, and that you've entered a valid Ethereum address!"
-        );
-        console.error(error);
-    }
-}
-
-
-async function deleteFlow(currentAccount) {
-
-
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-    const signer = provider.getSigner();
-
-    const chainId = await window.ethereum.request({ method: "eth_chainId" });
-    const sf = await Framework.create({
-        chainId: Number(chainId),
-        provider: provider
-    });
-
-    const DAIx = "0xe3cb950cb164a31c66e32c320a800d477019dcff";
-
-    const recipient = "0xED0262718A77e09C3C8F48696791747E878a5551"; //DAOFound address
-
-
-    try {
-
-        console.log("account", currentAccount);
-
-        const userData = defaultAbiCoder.encode(["address"], [currentAccount]);
-        const deleteFlowOperation = sf.cfaV1.deleteFlow({
-            sender: currentAccount,
-            receiver: recipient,
-            superToken: DAIx
-            // userData?: string
-        });
-        console.log("Deleting your stream...");
-
-        await deleteFlowOperation.exec(signer);
-
-        console.log(
-            `Congrats - you've just deleted your money stream!
-       Network: Kovan
-       Super Token: DAIx
-       Sender: 0xDCB45e4f6762C3D7C61a00e96Fb94ADb7Cf27721
-       Receiver: ${recipient}
-    `
-        );
-    } catch (error) {
-        console.error(error);
-    }
-
-
-}
-
-async function getEventsCovalent() {
-
-    console.log("test")
-    console.log("test");
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-
-        let proposalList = [];
-        let fundingList = [];
-        for (var entry of data.data.items) {
-            switch (entry.raw_log_topics[0]) {
-
-                case '0x344e2edbd54b7e137047f4e5af7fae74a07ad72083d9641d9cd5244653bded6b':
-                    const proposalEvent = defaultAbiCoder.decode(["string", "uint256", "uint256"], entry.raw_log_data);
-
-                    const proposal = {
-                        proposalAddress: defaultAbiCoder.decode(["address"], entry.raw_log_topics[1]),
-                        proposalDescription: proposalEvent[0],
-                        proposalPercentage: parseInt(proposalEvent[1]._hex, 16),
-                        proposalId: parseInt(proposalEvent[2]._hex, 16)
-                    };
-
-                    proposalList.push(proposal);
-                    break;
-                case '0xa7cbaaf15738ea1bcbdddfb06d8da60b51bd361982de413abad956b5df0b02b9':
-                    const fundingEvent = defaultAbiCoder.decode(["uint256", "uint256"], entry.raw_log_data);
-
-                    const funding = {
-                        fundingAddress: defaultAbiCoder.decode(["address"], entry.raw_log_topics[1]),
-                        fundingValue: parseInt(fundingEvent[0]._hex, 16),
-                        fundingProposalId: parseInt(fundingEvent[1]._hex, 16)
-
-                    }
-                    fundingList.push(funding);
-                    break;
-
-            }
-
-        }
-
-        console.log(proposalList, fundingList);
-    }
-
-    catch (error) {
-        console.error(error);
-    }
-
-}
-
-function CreateFlow() {
+function CreateFlow({ writeContracts, readContracts }) {
     const [recipient, setRecipient] = useState("");
     const [isButtonLoading, setIsButtonLoading] = useState(false);
     const [flowRate, setFlowRate] = useState("");
     const [flowRateDisplay, setFlowRateDisplay] = useState("");
     const [currentAccount, setCurrentAccount] = useState("");
 
+    function getDAITokenContract(chainId) {
+        switch (parseInt(chainId, 16)) {
+            case 42:
+                // kovan
+                return "0xe3cb950cb164a31c66e32c320a800d477019dcff";
+            case 4:
+                // rinkeby
+                return "0x745861AeD1EEe363b4AaA5F1994Be40b1e05Ff90";
+            case 80001:
+                // mumbai
+                return "0x5D8B4C2554aeB7e86F387B4d6c00Ac33499Ed01f";
+            default:
+                // eslint-disable-next-line no-throw-literal
+                throw `Unsupported network: ${chainId}`;
+        }
+    }
+
+    async function getSuperfluidFramework() {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+        const signer = provider.getSigner();
+
+        const chainId = await window.ethereum.request({ method: "eth_chainId" });
+        const sf = await Framework.create({
+            chainId: Number(chainId),
+            provider: provider
+        });
+
+        const daiTokenContract = getDAITokenContract(chainId);
+
+        return { sf, daiTokenContract, signer };
+    }
+
+    async function deleteFlow() {
+        const { sf, daiTokenContract, signer } = await getSuperfluidFramework();
+
+        const recipient = readContracts.DAOFound.address;
+
+        try {
+            const deleteFlowOperation = sf.cfaV1.deleteFlow({
+                sender: currentAccount,
+                receiver: recipient,
+                superToken: daiTokenContract
+            });
+            console.log("Deleting your stream...");
+
+            await deleteFlowOperation.exec(signer);
+
+            console.log(
+                `Congrats - you've just deleted your money stream!
+           Super Token: DAIx
+           Sender: ${currentAccount}
+           Receiver: ${recipient}
+        `
+            );
+        } catch (error) {
+            console.error(error);
+        }
 
 
+    }
 
+    async function createNewFlow() {
+        const { sf, daiTokenContract, signer } = await getSuperfluidFramework();
 
-    useEffect(() => {
-        getEventsCovalent();
-    }, []);
+        const recipient = readContracts.DAOFound.address;
+
+        try {
+            const createFlowOperation = sf.cfaV1.createFlow({
+                receiver: recipient,
+                flowRate: flowRate,
+                superToken: daiTokenContract,
+            });
+
+            console.log("Creating your stream...");
+
+            const result = await createFlowOperation.exec(signer);
+            console.log(result);
+
+            console.log(
+                `Congrats - you've just created a money stream!
+        View Your Stream At: https://app.superfluid.finance/dashboard/${recipient}
+        Super Token: DAIx
+        Sender: ${signer}
+        Receiver: ${recipient},
+        FlowRate: ${flowRate}
+        `
+            );
+        } catch (error) {
+            console.log(
+                "Hmmm, your transaction threw an error. Make sure that this stream does not already exist, and that you've entered a valid Ethereum address!"
+            );
+            console.error(error);
+        }
+    }
+
+    async function getFlow() {
+        const { sf, daiTokenContract, signer } = await getSuperfluidFramework();
+
+        const recipient = readContracts.DAOFound.address;
+
+        const response = await sf.cfaV1.getFlow({
+            superToken: daiTokenContract,
+            sender: currentAccount,
+            receiver: recipient,
+            providerOrSigner: signer
+        })
+
+        console.log(response.flowRate);
+
+    }
 
     const connectWallet = async () => {
         try {
@@ -295,12 +200,8 @@ function CreateFlow() {
         );
     }
 
-    const handleRecipientChange = (e) => {
-        setRecipient(() => ([e.target.name] = e.target.value));
-    };
-
     const handleFlowRateChange = (e) => {
-        setFlowRate(() => ([e.target.name] = e.target.value));
+        setFlowRate(e.target.value);
         let newFlowRateDisplay = calculateFlowRate(e.target.value);
         setFlowRateDisplay(newFlowRateDisplay.toString());
     };
@@ -317,30 +218,27 @@ function CreateFlow() {
                 </>
             ) : <></>}
             <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
-                <Input placeholder="Recipient"
-                    onChange={handleRecipientChange}
-
-                />
                 <Input placeholder="Flow rate"
                     onChange={handleFlowRateChange}
                 />
                 <Button
                     style={{ marginTop: 8 }}
-                    onClick={async () => {
-                        /* look how you call setPurpose on your contract: */
-                        /* notice how you pass a call back for tx updates too */
-                        createNewFlow(recipient, flowRate, currentAccount);
+                    onClick={() => {
+                        createNewFlow();
                     }}
                 >
                     Create stream!
                 </Button>
             </div>
             <Button onClick={async () => {
-                /* look how you call setPurpose on your contract: */
-                /* notice how you pass a call back for tx updates too */
-                getFlow(currentAccount);
+                getFlow();
             }}>
-                GET FLOW
+                GET STREAM
+            </Button>
+            <Button onClick={async () => {
+                deleteFlow();
+            }}>
+                DELETE STREAM
             </Button>
             <div className="description">
 
