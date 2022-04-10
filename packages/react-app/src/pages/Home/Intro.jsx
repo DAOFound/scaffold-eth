@@ -109,6 +109,7 @@ const Intro = () => {
                 <Button>Enter </Button>
               </Link>
             )}
+            {/*
             <Button
               onClick={() => {
                 sessionStorage.setItem("skillWallet", "test");
@@ -116,6 +117,7 @@ const Intro = () => {
             >
               ENTER NS{" "}
             </Button>{" "}
+            */}
             {/* use this for no skill wallet */}
           </Flex>
         </Box>
