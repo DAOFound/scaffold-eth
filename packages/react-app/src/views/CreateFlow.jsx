@@ -16,6 +16,7 @@ function CreateFlow({ readContracts, userProviderAndSigner, selectedChainId, add
 
     useEffect(() => {
         async function getData() {
+            console.log("getsexecuted");
             const actualFlow = await getFlow();
             setActualFlow(actualFlow);
         }
