@@ -6,12 +6,11 @@ import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switc
 import { ConsoleSqlOutlined } from "@ant-design/icons";
 import { usePoller } from "eth-hooks";
 
-function CreateFlow({ readContracts, userProviderAndSigner }) {
+function CreateFlow({ readContracts, userProviderAndSigner, selectedChainId, address }) {
     const [recipient, setRecipient] = useState("");
     const [isButtonLoading, setIsButtonLoading] = useState(false);
     const [flowRate, setFlowRate] = useState("");
     const [flowRateDisplay, setFlowRateDisplay] = useState("");
-    const [currentAccount, setCurrentAccount] = useState("");
 
     const [actualFlow, setActualFlow] = useState("")
 
@@ -26,7 +25,7 @@ function CreateFlow({ readContracts, userProviderAndSigner }) {
     });
 
     function getDAITokenContract(chainId) {
-        switch (parseInt(chainId, 16)) {
+        switch (chainId) {
             case 42:
                 // kovan
                 return "0xe3cb950cb164a31c66e32c320a800d477019dcff";
@@ -47,9 +46,9 @@ function CreateFlow({ readContracts, userProviderAndSigner }) {
 
         const signer = userProviderAndSigner.signer;
 
-        const chainId = await window.ethereum.request({ method: "eth_chainId" });
+        const chainId = selectedChainId;
         const sf = await Framework.create({
-            chainId: Number(chainId),
+            chainId: selectedChainId,
             provider: provider
         });
 
@@ -65,7 +64,7 @@ function CreateFlow({ readContracts, userProviderAndSigner }) {
 
         try {
             const deleteFlowOperation = sf.cfaV1.deleteFlow({
-                sender: currentAccount,
+                sender: address,
                 receiver: recipient,
                 superToken: daiTokenContract
             });
@@ -76,7 +75,7 @@ function CreateFlow({ readContracts, userProviderAndSigner }) {
             console.log(
                 `Congrats - you've just deleted your money stream!
            Super Token: DAIxF
-           Sender: ${currentAccount}
+           Sender: ${address}
            Receiver: ${recipient}
         `
             );
@@ -130,7 +129,7 @@ function CreateFlow({ readContracts, userProviderAndSigner }) {
 
         const response = await sf.cfaV1.getFlow({
             superToken: daiTokenContract,
-            sender: currentAccount,
+            sender: address,
             receiver: recipient,
             providerOrSigner: signer
         })
@@ -139,58 +138,7 @@ function CreateFlow({ readContracts, userProviderAndSigner }) {
 
     }
 
-    const connectWallet = async () => {
-        try {
-            const { ethereum } = window;
 
-            if (!ethereum) {
-                alert("Get MetaMask!");
-                return;
-            }
-            const accounts = await ethereum.request({
-                method: "eth_requestAccounts"
-            });
-            console.log("Connected", accounts[0]);
-            setCurrentAccount(accounts[0]);
-            // let account = currentAccount;
-            // Setup listener! This is for the case where a user comes to our site
-            // and connected their wallet for the first time.
-            // setupEventListener()
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const checkIfWalletIsConnected = async () => {
-        const { ethereum } = window;
-
-        if (!ethereum) {
-            console.log("Make sure you have metamask!");
-            return;
-        } else {
-            console.log("We have the ethereum object", ethereum);
-        }
-
-        const accounts = await ethereum.request({ method: "eth_accounts" });
-        const chain = await window.ethereum.request({ method: "eth_chainId" });
-        let chainId = chain;
-        console.log("chain ID:", chain);
-        console.log("global Chain Id:", chainId);
-        if (accounts.length !== 0) {
-            const account = accounts[0];
-            console.log("Found an authorized account:", account);
-            setCurrentAccount(account);
-            // Setup listener! This is for the case where a user comes to our site
-            // and ALREADY had their wallet connected + authorized.
-            // setupEventListener()
-        } else {
-            console.log("No authorized account found");
-        }
-    };
-
-    useEffect(() => {
-        checkIfWalletIsConnected();
-    }, []);
 
     function calculateFlowRate(amount) {
         if (typeof Number(amount) !== "number" || isNaN(Number(amount)) === true) {
@@ -207,13 +155,7 @@ function CreateFlow({ readContracts, userProviderAndSigner }) {
         }
     }
 
-    function CreateButton({ isLoading, children, ...props }) {
-        return (
-            <Button variant="success" className="button" {...props}>
-                {isButtonLoading ? <Spin animation="border" /> : children}
-            </Button>
-        );
-    }
+
 
     const handleFlowRateChange = (e) => {
         setFlowRate(e.target.value);

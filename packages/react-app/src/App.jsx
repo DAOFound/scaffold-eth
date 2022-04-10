@@ -260,9 +260,11 @@ function App(props) {
             </Route>
             <Route path="/createFlow">
               <CreateFlow
+                selectedChainId={selectedChainId}
                 readContracts={readContracts}
                 writeContracts={writeContracts}
-                userProviderAndSigner={userProviderAndSigner} />
+                userProviderAndSigner={userProviderAndSigner}
+                address={address} />
             </Route>
           </Switch>
           <ThemeSwitch />
