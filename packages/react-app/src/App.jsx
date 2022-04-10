@@ -33,7 +33,7 @@ import { CreateProposal, Hints, Subgraph, CreateFlow, ProposalList } from "./vie
 import { useStaticJsonRPC } from "./hooks";
 
 import Intro from "./pages/Home/Intro";
-import { HStack, Flex, Image, Text, Box } from "@chakra-ui/react";
+import { HStack, Flex, Image, Text, Box, VStack } from "@chakra-ui/react";
 import DAOFoundImage from "./logo_transparent.png";
 
 const { ethers } = require("ethers");
@@ -274,7 +274,7 @@ function App(props) {
                     DAOFound User Dashboard
                   </Text>
                 </Box>
-                <Text mt={10} mb={5} fontSize="xl" textAlign="center">
+                <Text mb={5} fontSize="xl" textAlign="center">
                   You are currently connected to:
                 </Text>
                 <NetworkSwitch
@@ -282,7 +282,7 @@ function App(props) {
                   selectedNetwork={selectedNetwork}
                   setSelectedNetwork={setSelectedNetwork}
                 />
-                <HStack ml={250} mt={10}>
+                <HStack ml={250} mt={2}>
                   <Text mt={10} mb={5} pb={5} fontSize="xl" textAlign="center">
                     Account Number:
                   </Text>
@@ -300,6 +300,14 @@ function App(props) {
                   />
                 </HStack>
                 <FaucetHint localProvider={localProvider} targetNetwork={targetNetwork} address={address} />
+                <VStack mt={2}>
+                  <Text mt={10} mb={5} pb={5} fontSize="xl" textAlign="center">
+                    So far we have collected: 20000$
+                  </Text>
+                  <Text mt={10} mb={5} pb={5} fontSize="xl" textAlign="center">
+                    and our budget is growing every second! :)
+                  </Text>
+                </VStack>
               </Box>
             </Route>
             <Route exact path="/listProposals">
