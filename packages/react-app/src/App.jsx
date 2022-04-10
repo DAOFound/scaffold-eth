@@ -207,9 +207,12 @@ function App(props) {
 
   useEffect(() => {
     const skillWallet = sessionStorage.getItem("skillWallet");
+
+    console.log(skillWallet);
     if (skillWallet) {
       setIsIntro(false);
     }
+
   });
 
   return (
@@ -219,27 +222,27 @@ function App(props) {
       ) : (
         <>
           <Menu style={{ textAlign: "center", marginTop: 40 }} selectedKeys={[location.pathname]} mode="horizontal">
-            <Menu.Item key="/">
+            {/* <Menu.Item key="/">
               <Link to="/">App Home</Link>
-            </Menu.Item>
+            </Menu.Item> */}
             <Menu.Item key="/listProposals">
               <Link to="/listProposals">Proposal list</Link>
             </Menu.Item>
-            <Menu.Item key="/hints">
+            {/* <Menu.Item key="/hints">
               <Link to="/hints">Hints</Link>
-            </Menu.Item>
+            </Menu.Item> */}
             <Menu.Item key="/createFlow">
               <Link to="/createFlow">Create Flow</Link>
             </Menu.Item>
             <Menu.Item key="/exampleUI">
-              <Link to="/exampleUI">CREATEPROPOSALVOTE</Link>
+              <Link to="/exampleUI">Create Proposal</Link>
             </Menu.Item>
           </Menu>
 
           <Switch>
             <Route exact path="/">
               {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
-              <Home yourLocalBalance={yourLocalBalance} readContracts={readContracts} />
+              {/* <Home yourLocalBalance={yourLocalBalance} readContracts={readContracts} /> */}
             </Route>
             <Route exact path="/listProposals">
               <ProposalList
@@ -249,16 +252,17 @@ function App(props) {
                 tx={tx}
               />
             </Route>
-            <Route path="/hints">
-              <Hints
-                address={address}
-                yourLocalBalance={yourLocalBalance}
-                mainnetProvider={mainnetProvider}
-                price={price}
+            <Route path="/exampleUI">
+              <ExampleUI
+                tx={tx}
+                writeContracts={writeContracts}
               />
             </Route>
             <Route path="/createFlow">
-              <CreateFlow readContracts={readContracts} />
+              <CreateFlow
+                readContracts={readContracts}
+                writeContracts={writeContracts}
+                userProviderAndSigner={userProviderAndSigner} />
             </Route>
           </Switch>
           <ThemeSwitch />

@@ -4,13 +4,26 @@ import { ethers } from "ethers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switch } from "antd";
 import { ConsoleSqlOutlined } from "@ant-design/icons";
+import { usePoller } from "eth-hooks";
 
-function CreateFlow({ readContracts }) {
+function CreateFlow({ readContracts, userProviderAndSigner }) {
     const [recipient, setRecipient] = useState("");
     const [isButtonLoading, setIsButtonLoading] = useState(false);
     const [flowRate, setFlowRate] = useState("");
     const [flowRateDisplay, setFlowRateDisplay] = useState("");
     const [currentAccount, setCurrentAccount] = useState("");
+
+    const [actualFlow, setActualFlow] = useState("")
+
+    useEffect(() => {
+        async function getData() {
+            const actualFlow = await getFlow();
+            setActualFlow(actualFlow);
+        }
+
+        getData();
+
+    });
 
     function getDAITokenContract(chainId) {
         switch (parseInt(chainId, 16)) {
@@ -30,9 +43,9 @@ function CreateFlow({ readContracts }) {
     }
 
     async function getSuperfluidFramework() {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const provider = userProviderAndSigner.provider
 
-        const signer = provider.getSigner();
+        const signer = userProviderAndSigner.signer;
 
         const chainId = await window.ethereum.request({ method: "eth_chainId" });
         const sf = await Framework.create({
@@ -62,7 +75,7 @@ function CreateFlow({ readContracts }) {
 
             console.log(
                 `Congrats - you've just deleted your money stream!
-           Super Token: DAIx
+           Super Token: DAIxF
            Sender: ${currentAccount}
            Receiver: ${recipient}
         `
@@ -113,6 +126,8 @@ function CreateFlow({ readContracts }) {
 
         const recipient = readContracts.DAOFound.address;
 
+
+
         const response = await sf.cfaV1.getFlow({
             superToken: daiTokenContract,
             sender: currentAccount,
@@ -120,7 +135,7 @@ function CreateFlow({ readContracts }) {
             providerOrSigner: signer
         })
 
-        console.log(response.flowRate);
+        return response;
 
     }
 
@@ -208,15 +223,7 @@ function CreateFlow({ readContracts }) {
 
     return (
         <div>
-            <h2>Create a Flow</h2>
-            {currentAccount === "" ? (
-                <>
-                    <button id="connectWallet" className="button" onClick={connectWallet}>
-                        Connect Wallet
-                    </button>
 
-                </>
-            ) : <></>}
             <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
                 <Input placeholder="Flow rate"
                     onChange={handleFlowRateChange}
@@ -230,24 +237,38 @@ function CreateFlow({ readContracts }) {
                     Create stream!
                 </Button>
             </div>
-            <Button onClick={async () => {
-                getFlow();
-            }}>
-                GET STREAM
-            </Button>
-            <Button onClick={async () => {
-                deleteFlow();
-            }}>
-                DELETE STREAM
-            </Button>
+
+
             <div className="description">
 
                 <div className="calculation">
-                    <p>Your flow will be equal to:</p>
+                    <p>Your stream will be equal to:</p>
                     <p>
                         <b>${flowRateDisplay !== " " ? flowRateDisplay : 0}</b> DAIx/month
                     </p>
                 </div>
+            </div>
+            <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
+                {actualFlow && actualFlow.flowRate != 0 ? (
+                    <>
+                        <Button onClick={async () => {
+                            deleteFlow();
+                        }}>
+                            DELETE STREAM
+                        </Button>
+                        <Divider />
+                        <Card>
+                            <dt>Total deposit </dt>
+                            <dd> {actualFlow.deposit}</dd>
+                            <dt>Flow per second </dt>
+                            <dd> {actualFlow.flowRate}</dd>
+
+                        </Card>
+                    </>
+                ) : (
+                    <></>
+                )
+                }
             </div>
         </div>
     );

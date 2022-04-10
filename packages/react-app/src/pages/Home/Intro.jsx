@@ -6,6 +6,7 @@ import { InitSwAuth } from "@skill-wallet/auth";
 import DAOFoundImage from "../../daofound.jpg";
 
 import "./home.css";
+import { Session } from "walletlink/dist/relay/Session";
 
 const Intro = () => {
   const colorMode = "dark";
@@ -105,9 +106,12 @@ const Intro = () => {
             </Box>
             {account && (
               <Link to="/dashboard">
-                <Button>Enter</Button>
+                <Button>Enter </Button>
               </Link>
             )}
+            <Button onClick={() => {
+              sessionStorage.setItem("skillWallet", "test");
+            }}>ENTER NS </Button>  {/* use this for no skill wallet */}
           </Flex>
         </Box>
       </Grid>

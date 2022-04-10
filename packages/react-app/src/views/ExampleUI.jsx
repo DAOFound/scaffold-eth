@@ -1,19 +1,9 @@
-import { Button, Card, DatePicker, Divider, Input, Progress, Slider, Spin, Switch } from "antd";
+import { Button, Divider, Input } from "antd";
 import React, { useState } from "react";
-import { utils } from "ethers";
-import { SyncOutlined } from "@ant-design/icons";
 
-import { Address, Balance, Events } from "../components";
 
 export default function ExampleUI({
-  purpose,
-  address,
-  mainnetProvider,
-  localProvider,
-  yourLocalBalance,
-  price,
   tx,
-  readContracts,
   writeContracts,
 }) {
   const [description, setDescription] = useState("");
@@ -27,7 +17,7 @@ export default function ExampleUI({
       */}
       <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 64 }}>
         <h2>Create proposals UI:</h2>
-        <h4>You need NFT token to do it: {purpose}</h4>
+        <h4>You need NFT token to do it</h4>
         <Divider />
         <div style={{ margin: 8 }}>
           <Input placeholder="Description"
