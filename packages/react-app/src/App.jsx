@@ -245,7 +245,7 @@ function App(props) {
               <Link to="/">App Home</Link>
             </Menu.Item> */}
               <Menu.Item key="/listProposals">
-                <Link to="/listProposals">Proposal list</Link>
+                <Link to="/listProposals">Proposals list</Link>
               </Menu.Item>
               {/* <Menu.Item key="/hints">
               <Link to="/hints">Hints</Link>
@@ -302,7 +302,7 @@ function App(props) {
                 <FaucetHint localProvider={localProvider} targetNetwork={targetNetwork} address={address} />
                 <VStack mt={2}>
                   <Text mt={10} mb={5} pb={5} fontSize="xl" textAlign="center">
-                    So far we have collected: 20000$
+                    So far we have collected: 8496.37$
                   </Text>
                   <Text mt={10} mb={5} pb={5} fontSize="xl" textAlign="center">
                     and our budget is growing every second! :)
