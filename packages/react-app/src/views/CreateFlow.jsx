@@ -22,7 +22,7 @@ function CreateFlow({ readContracts, userProviderAndSigner, selectedChainId, add
       }
 
       getData();
-    }, []);
+    }, [flowRate]);
 
     function getDAITokenContract(chainId) {
         switch (chainId) {
