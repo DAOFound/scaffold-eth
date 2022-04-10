@@ -258,7 +258,7 @@ function App(props) {
               />
             </Route>
             <Route path="/createFlow">
-              <CreateFlow />
+              <CreateFlow readContracts={readContracts} />
             </Route>
           </Switch>
           <ThemeSwitch />
