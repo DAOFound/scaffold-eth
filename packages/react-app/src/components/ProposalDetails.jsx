@@ -1,4 +1,8 @@
-export function ProposalDetails({ proposal }) {
+import Address from "./Address";
+import { ProposalExecuteButton } from "./ProposalExecuteButton";
+import { ProposalVoteButton } from "./ProposalVoteButton";
+
+export function ProposalDetails({ proposal, mainnetProvider, writeContracts, tx }) {
   var completedContent;
   if (proposal.completed) {
     completedContent = (
@@ -10,13 +14,14 @@ export function ProposalDetails({ proposal }) {
   } else {
     completedContent = (
       <>
-        <button>Vote for this proposal now!</button>
+        <ProposalVoteButton proposal={proposal} writeContracts={writeContracts} tx={tx} /><br />
+        <ProposalExecuteButton proposal={proposal} writeContracts={writeContracts} tx={tx} />
       </>
     );
   }
 
   return (
-    <div>
+    <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 30 }}>
       <h4>Proposal {proposal.proposalId}</h4>
       <dl>
         <dt>Description</dt>

@@ -1,9 +1,28 @@
-import { DAOFOUND_CONTRACT_ADDRESS, COVALENT_API_KEY } from "../constants";
+import { COVALENT_API_KEY } from "../constants";
 import { defaultAbiCoder } from "ethers/lib/utils";
 var base64 = require("base-64");
 
-async function fetchCovalentProposalData(chainId) {
-  const url = `https://api.covalenthq.com/v1/${chainId}/events/address/${DAOFOUND_CONTRACT_ADDRESS}/?starting-block=30920009&ending-block=latest`
+async function fetchCovalentProposalData(chainId, contractAddress) {
+  let startingBlock;
+  switch (chainId) {
+    case 4:
+      // rinkeby
+      startingBlock = 10476811;
+      break;
+    case 42:
+      // kovan
+      startingBlock = 30925881;
+      break;
+    case 80001:
+      // mumbai
+      startingBlock = 25867536;
+      break;
+    default:
+      // eslint-disable-next-line no-throw-literal
+      throw `Unsupported chain ID: ${chainId}`;
+  }
+
+  const url = `https://api.covalenthq.com/v1/${chainId}/events/address/${contractAddress}/?starting-block=${startingBlock}&ending-block=latest`
   var headers = new Headers();
   headers.append("Authorization", "Basic " + base64.encode(COVALENT_API_KEY + ":"));
   return fetch(url, { headers });
@@ -57,8 +76,8 @@ function processCovalentData(data) {
   return proposals;
 }
 
-export async function getProposalDataFromCovalent(chainId) {
-  var proposalResponse = await fetchCovalentProposalData(chainId);
+export async function getProposalDataFromCovalent(chainId, contractAddress) {
+  var proposalResponse = await fetchCovalentProposalData(chainId, contractAddress);
   var proposalData = await proposalResponse.json();
   return processCovalentData(proposalData);
 }

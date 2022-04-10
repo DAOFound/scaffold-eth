@@ -2,22 +2,28 @@ import { useEffect, useState } from "react";
 import { ProposalDetails } from "../components/ProposalDetails";
 import { getProposalDataFromCovalent } from "../helpers/covalent";
 
-function ProposalList({ chainId }) {
+function ProposalList({ chainId, mainnetProvider, writeContracts, tx }) {
   const [proposals, setProposals] = useState([]);
 
   useEffect(() => {
     if (!chainId) return;
     async function getData() {
-      var proposalData = await getProposalDataFromCovalent(chainId);
+      var proposalData = await getProposalDataFromCovalent(chainId, writeContracts.DAOFound.address);
       setProposals(proposalData);
     }
     getData();
-  }, [chainId]);
+  }, [chainId, writeContracts.DAOFound]);
 
   return (
     <>
       {Object.values(proposals).map(proposal => (
-        <ProposalDetails proposal={proposal} key={proposal.proposalId} />
+        <ProposalDetails
+          proposal={proposal}
+          key={proposal.proposalId}
+          mainnetProvider={mainnetProvider}
+          writeContracts={writeContracts}
+          tx={tx}
+        />
       ))}
     </>
   );
