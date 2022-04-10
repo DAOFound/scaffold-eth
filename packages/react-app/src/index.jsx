@@ -2,6 +2,9 @@ import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import React from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { BrowserRouter } from "react-router-dom";
+
+   
+import { ChakraProvider, ColorModeScript, extendTheme } from "@chakra-ui/react";
 import ReactDOM from "react-dom";
 import App from "./App";
 import "./index.css";
@@ -20,12 +23,25 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
+const theme = extendTheme({
+  // initialColorMode: "dark",
+  styles: {
+    global: {
+      body: {
+        fontFamily: '"Saira", sans-serif',
+      },
+    },
+  },
+});
+
 ReactDOM.render(
   <ApolloProvider client={client}>
-    <ThemeSwitcherProvider themeMap={themes} defaultTheme={prevTheme || "light"}>
-      <BrowserRouter>
-        <App subgraphUri={subgraphUri} />
-      </BrowserRouter>
+    <ThemeSwitcherProvider themeMap={themes} defaultTheme={"dark"}>
+      <ChakraProvider theme={theme}>
+        <BrowserRouter>
+          <App subgraphUri={subgraphUri} />
+        </BrowserRouter>
+      </ChakraProvider>
     </ThemeSwitcherProvider>
   </ApolloProvider>,
   document.getElementById("root"),
