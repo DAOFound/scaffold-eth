@@ -21,7 +21,7 @@ export function ProposalDetails({ proposal, mainnetProvider, writeContracts, tx 
   }
 
   return (
-    <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 30 }}>
+    <div style={{ border: "1px solid #cccccc", padding: 16, width: 400, margin: "auto", marginTop: 70 }}>
       <h4>Proposal {proposal.proposalId}</h4>
       <dl>
         <dt>Description</dt>

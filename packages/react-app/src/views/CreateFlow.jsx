@@ -15,15 +15,14 @@ function CreateFlow({ readContracts, userProviderAndSigner, selectedChainId, add
     const [actualFlow, setActualFlow] = useState("")
 
     useEffect(() => {
-        async function getData() {
-            console.log("getsexecuted");
-            const actualFlow = await getFlow();
-            setActualFlow(actualFlow);
-        }
+      async function getData() {
+        console.log("getsexecuted");
+        const actualFlow = await getFlow();
+        setActualFlow(actualFlow);
+      }
 
-        getData();
-
-    }, [deleteFlow, createNewFlow]);
+      getData();
+    }, []);
 
     function getDAITokenContract(chainId) {
         switch (chainId) {

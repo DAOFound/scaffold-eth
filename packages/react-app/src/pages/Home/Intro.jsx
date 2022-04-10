@@ -44,7 +44,7 @@ const Intro = () => {
       >
         <Box ml={12}>
           <HStack>
-            <Image src={DAOFoundImage} alt="logo" boxSize="150px" />
+            <Image src={DAOFoundImage} alt="logo" boxSize="400px" />
             <Text fontSize="7xl" textAlign="right">
               DAOFound
             </Text>
@@ -109,9 +109,14 @@ const Intro = () => {
                 <Button>Enter </Button>
               </Link>
             )}
-            <Button onClick={() => {
-              sessionStorage.setItem("skillWallet", "test");
-            }}>ENTER NS </Button>  {/* use this for no skill wallet */}
+            <Button
+              onClick={() => {
+                sessionStorage.setItem("skillWallet", "test");
+              }}
+            >
+              ENTER NS{" "}
+            </Button>{" "}
+            {/* use this for no skill wallet */}
           </Flex>
         </Box>
       </Grid>

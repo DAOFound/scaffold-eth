@@ -29,10 +29,12 @@ import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
-import { Home, ExampleUI, Hints, Subgraph, CreateFlow, ProposalList } from "./views";
+import { CreateProposal, Hints, Subgraph, CreateFlow, ProposalList } from "./views";
 import { useStaticJsonRPC } from "./hooks";
 
 import Intro from "./pages/Home/Intro";
+import { HStack, Flex, Image, Text, Box } from "@chakra-ui/react";
+import DAOFoundImage from "./logo_transparent.png";
 
 const { ethers } = require("ethers");
 /*
@@ -207,51 +209,98 @@ function App(props) {
 
   useEffect(() => {
     const skillWallet = sessionStorage.getItem("skillWallet");
-
-    console.log(skillWallet);
     if (skillWallet) {
       setIsIntro(false);
     }
-
   });
 
   return (
-
     <div className="App">
       {isIntro ? (
         <Intro />
       ) : (
-
-        <>      <NetworkDisplay
-          NETWORKCHECK={NETWORKCHECK}
-          localChainId={localChainId}
-          selectedChainId={selectedChainId}
-          targetNetwork={targetNetwork}
-          logoutOfWeb3Modal={logoutOfWeb3Modal}
-          USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
-        />
-          <Menu style={{ textAlign: "center", marginTop: 40 }} selectedKeys={[location.pathname]} mode="horizontal">
-            {/* <Menu.Item key="/">
+        <>
+          {" "}
+          <HStack>
+            <NetworkDisplay
+              NETWORKCHECK={NETWORKCHECK}
+              localChainId={localChainId}
+              selectedChainId={selectedChainId}
+              targetNetwork={targetNetwork}
+              logoutOfWeb3Modal={logoutOfWeb3Modal}
+              USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
+            />
+          </HStack>
+          <Flex alignItems="center" flex="0 1 auto" boxShadow="md" pos="fixed" w="100vw" zIndex={2}>
+            <Menu style={{ textAlign: "center", width: "100%" }} selectedKeys={[location.pathname]} mode="horizontal">
+              <Menu.Item key="/" style={{ position: "relative", right: "10%" }}>
+                <Link to="/">
+                  <HStack>
+                    <Image src={DAOFoundImage} alt="logo" boxSize="30px" />
+                    <Text textAlign="right">DAOFound</Text>
+                  </HStack>
+                </Link>
+              </Menu.Item>
+              {/* <Menu.Item key="/">
               <Link to="/">App Home</Link>
             </Menu.Item> */}
-            <Menu.Item key="/listProposals">
-              <Link to="/listProposals">Proposal list</Link>
-            </Menu.Item>
-            {/* <Menu.Item key="/hints">
+              <Menu.Item key="/listProposals">
+                <Link to="/listProposals">Proposal list</Link>
+              </Menu.Item>
+              {/* <Menu.Item key="/hints">
               <Link to="/hints">Hints</Link>
             </Menu.Item> */}
-            <Menu.Item key="/createFlow">
-              <Link to="/createFlow">Create Flow</Link>
-            </Menu.Item>
-            <Menu.Item key="/exampleUI">
-              <Link to="/exampleUI">Create Proposal</Link>
-            </Menu.Item>
-          </Menu>
-
+              <Menu.Item key="/createFlow">
+                <Link to="/createFlow">Create Flow</Link>
+              </Menu.Item>
+              <Menu.Item key="/createProposal">
+                <Link to="/createProposal">Create Proposal</Link>
+              </Menu.Item>
+              <Menu.Item style={{ position: "relative", left: "14%" }}>
+                <sw-auth
+                  partner-key="9a916a3443179cf183be272e596a64392a6f55ea"
+                  use-dev="true"
+                  use-button-options="true"
+                ></sw-auth>
+              </Menu.Item>
+            </Menu>
+          </Flex>
           <Switch>
             <Route exact path="/">
               {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
-              {/* <Home yourLocalBalance={yourLocalBalance} readContracts={readContracts} /> */}
+              <Box height={"100vh"}>
+                <Box mt={20}>
+                  <Text fontSize="4xl" textAlign="center">
+                    DAOFound User Dashboard
+                  </Text>
+                </Box>
+                <Text mt={10} mb={5} fontSize="xl" textAlign="center">
+                  You are currently connected to:
+                </Text>
+                <NetworkSwitch
+                  networkOptions={networkOptions}
+                  selectedNetwork={selectedNetwork}
+                  setSelectedNetwork={setSelectedNetwork}
+                />
+                <HStack ml={250} mt={10}>
+                  <Text mt={10} mb={5} pb={5} fontSize="xl" textAlign="center">
+                    Account Number:
+                  </Text>
+                  <Account
+                    useBurner={USE_BURNER_WALLET}
+                    address={address}
+                    localProvider={localProvider}
+                    userSigner={userSigner}
+                    mainnetProvider={mainnetProvider}
+                    price={price}
+                    web3Modal={web3Modal}
+                    loadWeb3Modal={loadWeb3Modal}
+                    logoutOfWeb3Modal={logoutOfWeb3Modal}
+                    blockExplorer={blockExplorer}
+                  />
+                </HStack>
+                <FaucetHint localProvider={localProvider} targetNetwork={targetNetwork} address={address} />
+              </Box>
             </Route>
             <Route exact path="/listProposals">
               <ProposalList
@@ -261,50 +310,23 @@ function App(props) {
                 tx={tx}
               />
             </Route>
-            <Route path="/exampleUI">
-              <ExampleUI
-                tx={tx}
-                writeContracts={writeContracts}
-              />
-            </Route>
             <Route path="/createFlow">
-              <CreateFlow
-                selectedChainId={selectedChainId}
-                readContracts={readContracts}
-                writeContracts={writeContracts}
-                userProviderAndSigner={userProviderAndSigner}
-                address={address} />
+              <Box height={"100vh"} mt={100}>
+                <CreateFlow
+                  selectedChainId={selectedChainId}
+                  readContracts={readContracts}
+                  writeContracts={writeContracts}
+                  userProviderAndSigner={userProviderAndSigner}
+                  address={address}
+                />
+              </Box>
+            </Route>
+            <Route path="/createProposal">
+              <Box height={"100vh"} mt={200}>
+                <CreateProposal tx={tx} writeContracts={writeContracts} />
+              </Box>
             </Route>
           </Switch>
-          <ThemeSwitch />
-          <div style={{ position: "fixed", textAlign: "right", right: 0, top: 0, padding: 10 }}>
-            <div style={{ display: "flex", flex: 1, alignItems: "center" }}>
-              {USE_NETWORK_SELECTOR && (
-                <div style={{ marginRight: 20 }}>
-                  <NetworkSwitch
-                    networkOptions={networkOptions}
-                    selectedNetwork={selectedNetwork}
-                    setSelectedNetwork={setSelectedNetwork}
-                  />
-                </div>
-              )}
-              <Account
-                useBurner={USE_BURNER_WALLET}
-                address={address}
-                localProvider={localProvider}
-                userSigner={userSigner}
-                mainnetProvider={mainnetProvider}
-                price={price}
-                web3Modal={web3Modal}
-                loadWeb3Modal={loadWeb3Modal}
-                logoutOfWeb3Modal={logoutOfWeb3Modal}
-                blockExplorer={blockExplorer}
-              />
-            </div>
-            {yourLocalBalance.lte(ethers.BigNumber.from("0")) && (
-              <FaucetHint localProvider={localProvider} targetNetwork={targetNetwork} address={address} />
-            )}
-          </div>
         </>
       )}
     </div>

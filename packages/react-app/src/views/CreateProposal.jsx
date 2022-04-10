@@ -2,10 +2,7 @@ import { Button, Divider, Input } from "antd";
 import React, { useState } from "react";
 
 
-export default function ExampleUI({
-  tx,
-  writeContracts,
-}) {
+export default function CreateProposal({ tx, writeContracts }) {
   const [description, setDescription] = useState("");
   const [recipient, setRecipient] = useState("");
   const [value, setValue] = useState("");
@@ -20,17 +17,20 @@ export default function ExampleUI({
         <h4>You need NFT token to do it</h4>
         <Divider />
         <div style={{ margin: 8 }}>
-          <Input placeholder="Description"
+          <Input
+            placeholder="Description"
             onChange={e => {
               setDescription(e.target.value);
             }}
           />
-          <Input placeholder="Recipient"
+          <Input
+            placeholder="Recipient"
             onChange={e => {
               setRecipient(e.target.value);
             }}
           />
-          <Input placeholder="% value"
+          <Input
+            placeholder="% value"
             onChange={e => {
               setValue(e.target.value);
             }}
@@ -46,12 +46,12 @@ export default function ExampleUI({
                   console.log(" 🍾 Transaction " + update.hash + " finished!");
                   console.log(
                     " ⛽️ " +
-                    update.gasUsed +
-                    "/" +
-                    (update.gasLimit || update.gas) +
-                    " @ " +
-                    parseFloat(update.gasPrice) / 1000000000 +
-                    " gwei",
+                      update.gasUsed +
+                      "/" +
+                      (update.gasLimit || update.gas) +
+                      " @ " +
+                      parseFloat(update.gasPrice) / 1000000000 +
+                      " gwei",
                   );
                 }
               });
