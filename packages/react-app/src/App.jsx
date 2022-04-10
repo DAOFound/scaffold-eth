@@ -216,11 +216,20 @@ function App(props) {
   });
 
   return (
+
     <div className="App">
       {isIntro ? (
         <Intro />
       ) : (
-        <>
+
+        <>      <NetworkDisplay
+          NETWORKCHECK={NETWORKCHECK}
+          localChainId={localChainId}
+          selectedChainId={selectedChainId}
+          targetNetwork={targetNetwork}
+          logoutOfWeb3Modal={logoutOfWeb3Modal}
+          USE_NETWORK_SELECTOR={USE_NETWORK_SELECTOR}
+        />
           <Menu style={{ textAlign: "center", marginTop: 40 }} selectedKeys={[location.pathname]} mode="horizontal">
             {/* <Menu.Item key="/">
               <Link to="/">App Home</Link>
@@ -268,6 +277,34 @@ function App(props) {
             </Route>
           </Switch>
           <ThemeSwitch />
+          <div style={{ position: "fixed", textAlign: "right", right: 0, top: 0, padding: 10 }}>
+            <div style={{ display: "flex", flex: 1, alignItems: "center" }}>
+              {USE_NETWORK_SELECTOR && (
+                <div style={{ marginRight: 20 }}>
+                  <NetworkSwitch
+                    networkOptions={networkOptions}
+                    selectedNetwork={selectedNetwork}
+                    setSelectedNetwork={setSelectedNetwork}
+                  />
+                </div>
+              )}
+              <Account
+                useBurner={USE_BURNER_WALLET}
+                address={address}
+                localProvider={localProvider}
+                userSigner={userSigner}
+                mainnetProvider={mainnetProvider}
+                price={price}
+                web3Modal={web3Modal}
+                loadWeb3Modal={loadWeb3Modal}
+                logoutOfWeb3Modal={logoutOfWeb3Modal}
+                blockExplorer={blockExplorer}
+              />
+            </div>
+            {yourLocalBalance.lte(ethers.BigNumber.from("0")) && (
+              <FaucetHint localProvider={localProvider} targetNetwork={targetNetwork} address={address} />
+            )}
+          </div>
         </>
       )}
     </div>
